@@ -8,13 +8,8 @@ import mammoth from "mammoth";
 import pdfParse from "pdf-parse";
 import * as XLSX from "xlsx";
 import path from "path";
-
-// Add at the top with other imports
-// import mammoth from "mammoth";
-// import pdfParse from "pdf-parse";
-// import * as XLSX from "xlsx";
-// import path from "path";
-// import fs from "fs";
+import clientPromise from "../../lib/mongo";
+import OpenAI from "openai";
 
 // Helper to parse file based on extension
 async function parseFile(file: any): Promise<string> {
@@ -42,6 +37,16 @@ async function parseFile(file: any): Promise<string> {
     return text;
   }
   throw new Error("Unsupported file type");
+}
+
+function chunkText(text: string, size = 500): string[] {
+  const chunks = [];
+  let i = 0;
+  while (i < text.length) {
+    chunks.push(text.slice(i, i + size));
+    i += size;
+  }
+  return chunks;
 }
 
 export const config = {
@@ -80,10 +85,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "No file uploaded" });
     }
 
+    if (!fs.existsSync(file.filepath)) {
+      return res.status(400).json({ error: "File not found on server" });
+    }
+
     const fileStream = fs.createReadStream(file.filepath);
     const key = `${session.user.email}/${file.originalFilename}`;
 
     try {
+      // 1. Upload to S3
       await s3.send(
         new PutObjectCommand({
           Bucket: process.env.AWS_S3_BUCKET!,
@@ -92,11 +102,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           ContentType: file.mimetype,
         })
       );
-      // Parse the file
+
+      // 2. Parse the file (using local file)
       const parsedText = await parseFile(file);
+
+      // 3. Chunk/embed/store in MongoDB
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const chunks = chunkText(parsedText);
+
+      const mongoClient = await clientPromise;
+      const db = mongoClient.db(); // use default db from URI
+      const collection = db.collection("embeddings");
+
+      for (const chunk of chunks) {
+        const embeddingResponse = await openai.embeddings.create({
+          model: "text-embedding-ada-002",
+          input: chunk,
+        });
+        const embedding = embeddingResponse.data[0].embedding;
+        await collection.insertOne({
+          user: session.user.email,
+          docKey: key,
+          chunk,
+          embedding,
+          createdAt: new Date(),
+        });
+      }
+
       return res.status(200).json({ success: true, key, parsedText });
     } catch (e) {
-      return res.status(500).json({ error: "S3 upload failed" });
+      console.error("S3 upload error:", e);
+      return res.status(500).json({ error: "S3 upload failed", details: e.message });
     }
   });
 }
