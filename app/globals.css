@@ -3,6 +3,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --brand-red: #ce1620;
+  --brand-blue: #0160a0;
+  --brand-yellow: #f4c000;
+  --brand-text: #1a1a1a;
+  --brand-bg: #F1EFEE;
 }
 
 @theme inline {
@@ -20,7 +25,7 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--brand-bg);
+  color: var(--brand-text);
   font-family: Arial, Helvetica, sans-serif;
 }

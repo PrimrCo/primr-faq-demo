@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth/[...nextauth]";
 import clientPromise from "../../lib/mongo";
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 
 function cosineSimilarity(a: number[], b: number[]) {
   const dot = a.reduce((sum, ai, i) => sum + ai * b[i], 0);
@@ -26,14 +26,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: "No question provided" });
   }
 
-  const openai = new OpenAIApi(new Configuration({ apiKey: process.env.OPENAI_API_KEY }));
+  // Initialize OpenAI client inside the handler
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   // Embed the question
-  const embeddingResponse = await openai.createEmbedding({
+  const embeddingResponse = await openai.embeddings.create({
     model: "text-embedding-ada-002",
     input: question,
   });
-  const questionEmbedding = embeddingResponse.data.data[0].embedding;
+  const questionEmbedding = embeddingResponse.data[0].embedding;
 
   // Fetch all embeddings for this user
   const mongoClient = await clientPromise;
@@ -53,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Use OpenAI completion to answer the question based on the best chunk
-  const completion = await openai.createChatCompletion({
+  const completion = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: [
       { role: "system", content: "You are a helpful assistant. Answer the user's question based on the provided context." },
@@ -61,5 +62,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ],
   });
 
-  return res.status(200).json({ answer: completion.data.choices[0].message?.content ?? "" });
+  return res.status(200).json({ answer: completion.choices[0].message?.content ?? "" });
 }
