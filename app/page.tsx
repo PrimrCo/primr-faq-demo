@@ -112,7 +112,12 @@ export default function HomePage() {
             {uploading ? "Uploading..." : "Upload"}
           </button>
         </div>
-        {message && <div className="mt-4 w-full text-center text-[var(--brand-red)] font-medium">{message}</div>}
+        {message && (
+          <div className="mt-4 w-full text-center px-4 py-2 rounded-lg font-medium
+            bg-red-50 text-[var(--brand-red)] border border-red-200 shadow-sm">
+            {message}
+          </div>
+        )}
         {parsedText && (
           <div className="mt-8 w-full">
             <h2 className="font-semibold text-[var(--brand-blue)] mb-2">Parsed Text</h2>
@@ -126,7 +131,13 @@ export default function HomePage() {
               type="text"
               value={question}
               onChange={e => setQuestion(e.target.value)}
-              placeholder="Type your question..."
+              onKeyDown={e => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleAsk();
+                }
+              }}
+              placeholder="Type your question and press Enter…"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] transition"
             />
             <button
@@ -143,6 +154,30 @@ export default function HomePage() {
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-base text-gray-900 whitespace-pre-wrap">{answer}</div>
             </div>
           )}
+        </div>
+        <div className="my-6 w-full text-gray-700 text-base">
+          <p className="mb-2">
+            <strong>How it works:</strong> Upload a document (
+            <span className="font-mono">.md</span>, <span className="font-mono">.txt</span>, <span className="font-mono">.pdf</span>,{" "}
+            <span className="font-mono">.docx</span>, <span className="font-mono">.csv</span>, <span className="font-mono">.xlsx</span>) and ask questions about its content. Our AI will read your file and answer based on what it finds.
+          </p>
+          <p className="mb-2">
+            <strong>Tip:</strong> Try asking about specific policies, procedures, or details from your uploaded document.
+          </p>
+          <p className="mb-2">
+            <strong>Privacy:</strong> Your files and questions are private to your Google account.
+          </p>
+          <p className="text-center text-sm text-gray-500">
+            If upload fails, check that your file is under 10MB and in a supported format.
+          </p>
+        </div>
+        <div className="text-xs text-gray-500">
+          <span className="font-semibold">Example questions:</span>
+          <ul className="list-disc list-inside">
+            <li>What is the refund policy?</li>
+            <li>How do I reset my password?</li>
+            <li>Who do I contact for support?</li>
+          </ul>
         </div>
         <button
           className="mt-10 text-sm text-[var(--brand-blue)] underline hover:text-blue-700 transition"
