@@ -89,6 +89,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "File not found on server" });
     }
 
+    if (!session?.user?.email) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
     const fileStream = fs.createReadStream(file.filepath);
     const key = `${session.user.email}/${file.originalFilename}`;
 
@@ -99,7 +103,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           Bucket: process.env.AWS_S3_BUCKET!,
           Key: key,
           Body: fileStream,
-          ContentType: file.mimetype,
+          ContentType: file.mimetype || undefined,
         })
       );
 
@@ -132,7 +136,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ success: true, key, parsedText });
     } catch (e) {
       console.error("S3 upload error:", e);
-      return res.status(500).json({ error: "S3 upload failed", details: e.message });
+      const message = e instanceof Error ? e.message : String(e);
+      return res.status(500).json({ error: "S3 upload failed", details: message });
     }
   });
 }
