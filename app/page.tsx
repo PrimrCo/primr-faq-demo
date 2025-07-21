@@ -57,14 +57,15 @@ export default function HomePage() {
     setAnswer(data.answer || "No answer found.");
   };
 
-  if (status === "loading") return <div>Loading...</div>;
+  if (status === "loading") return <div className="flex items-center justify-center min-h-screen text-lg">Loading...</div>;
   if (!session)
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--brand-bg)]">
-        <img src="/images/logo-v1.jpg" alt="Primr Logo" className="w-32 mb-6 rounded-xl shadow" />
-        <h1 className="text-2xl mb-4 font-bold text-[var(--brand-red)]">Sign in to upload your FAQ docs</h1>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--brand-bg)] px-4">
+        <img src="/images/logo-v1.jpg" alt="Primr Logo" className="w-28 h-28 mb-6 rounded-xl shadow-md object-contain" />
+        <h1 className="text-3xl font-extrabold mb-2 text-[var(--brand-red)] tracking-tight">Primr FAQ Demo</h1>
+        <p className="mb-6 text-gray-600 text-center max-w-md">Sign in with Google to upload your FAQ documents and ask questions powered by AI.</p>
         <button
-          className="bg-[var(--brand-blue)] text-white px-4 py-2 rounded font-semibold"
+          className="bg-[var(--brand-blue)] hover:bg-blue-700 transition text-white px-6 py-2 rounded-lg font-semibold shadow"
           onClick={() => signIn("google")}
         >
           Sign in with Google
@@ -73,61 +74,65 @@ export default function HomePage() {
     );
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--brand-bg)]">
-      <img src="/images/logo-v1.jpg" alt="Primr Logo" className="w-32 mb-6 rounded-xl shadow" />
-      <h1 className="text-2xl mb-4 font-bold text-[var(--brand-red)]">Upload your FAQ document</h1>
-      <input
-        type="file"
-        accept=".md,.txt,.pdf,.docx,.csv,.xlsx"
-        onChange={handleFileChange}
-        className="mb-2"
-      />
-      <button
-        className="bg-[var(--brand-blue)] text-white px-4 py-2 rounded font-semibold"
-        onClick={handleUpload}
-        disabled={uploading}
-      >
-        {uploading ? "Uploading..." : "Upload"}
-      </button>
-      {message && <div className="mt-2 text-[var(--brand-red)]">{message}</div>}
-      {parsedText && (
-        <div className="mt-4 w-full max-w-xl bg-white p-4 rounded shadow">
-          <h2 className="font-bold mb-2 text-[var(--brand-blue)]">Parsed Text:</h2>
-          <pre className="whitespace-pre-wrap text-[var(--brand-text)]">{parsedText}</pre>
+    <main className="flex flex-col items-center justify-center min-h-screen bg-[var(--brand-bg)] px-4">
+      <div className="w-full max-w-xl bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center">
+        <img src="/images/logo-v1.jpg" alt="Primr Logo" className="w-20 h-20 mb-4 rounded-lg object-contain shadow" />
+        <h1 className="text-2xl font-bold mb-1 text-[var(--brand-red)] tracking-tight">Upload your FAQ document</h1>
+        <p className="mb-6 text-gray-500 text-center">Supported: .md, .txt, .pdf, .docx, .csv, .xlsx</p>
+        <div className="w-full flex flex-col gap-3">
+          <input
+            type="file"
+            accept=".md,.txt,.pdf,.docx,.csv,.xlsx"
+            onChange={handleFileChange}
+            className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--brand-blue)] file:text-white hover:file:bg-blue-700 transition"
+          />
+          <button
+            className="w-full bg-[var(--brand-blue)] hover:bg-blue-700 transition text-white py-2 rounded-lg font-semibold shadow disabled:opacity-60"
+            onClick={handleUpload}
+            disabled={uploading}
+          >
+            {uploading ? "Uploading..." : "Upload"}
+          </button>
         </div>
-      )}
-
-      {/* Q&A Form */}
-      <div className="mt-8 w-full max-w-xl bg-white p-4 rounded shadow">
-        <h2 className="font-bold mb-2 text-[var(--brand-blue)]">Ask a Question</h2>
-        <input
-          type="text"
-          value={question}
-          onChange={e => setQuestion(e.target.value)}
-          placeholder="Type your question..."
-          className="w-full border border-[var(--brand-blue)] rounded px-2 py-1 mb-2"
-        />
-        <button
-          className="bg-[var(--brand-yellow)] text-[var(--brand-text)] px-4 py-2 rounded font-semibold"
-          onClick={handleAsk}
-          disabled={asking}
-        >
-          {asking ? "Asking..." : "Ask"}
-        </button>
-        {answer && (
-          <div className="mt-4">
-            <h3 className="font-bold text-[var(--brand-red)]">Answer:</h3>
-            <div className="text-[var(--brand-text)]">{answer}</div>
+        {message && <div className="mt-4 w-full text-center text-[var(--brand-red)] font-medium">{message}</div>}
+        {parsedText && (
+          <div className="mt-8 w-full">
+            <h2 className="font-semibold text-[var(--brand-blue)] mb-2">Parsed Text</h2>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-800 whitespace-pre-wrap max-h-64 overflow-auto">{parsedText}</div>
           </div>
         )}
+        <div className="mt-10 w-full">
+          <h2 className="font-semibold text-[var(--brand-blue)] mb-2">Ask a Question</h2>
+          <div className="flex flex-col gap-2">
+            <input
+              type="text"
+              value={question}
+              onChange={e => setQuestion(e.target.value)}
+              placeholder="Type your question..."
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] transition"
+            />
+            <button
+              className="w-full bg-[var(--brand-yellow)] hover:bg-yellow-400 transition text-[var(--brand-text)] py-2 rounded-lg font-semibold shadow disabled:opacity-60"
+              onClick={handleAsk}
+              disabled={asking}
+            >
+              {asking ? "Asking..." : "Ask"}
+            </button>
+          </div>
+          {answer && (
+            <div className="mt-6">
+              <h3 className="font-bold text-[var(--brand-red)] mb-1">Answer</h3>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-base text-gray-900 whitespace-pre-wrap">{answer}</div>
+            </div>
+          )}
+        </div>
+        <button
+          className="mt-10 text-sm text-[var(--brand-blue)] underline hover:text-blue-700 transition"
+          onClick={() => signOut()}
+        >
+          Sign out
+        </button>
       </div>
-
-      <button
-        className="mt-8 text-sm underline text-[var(--brand-blue)]"
-        onClick={() => signOut()}
-      >
-        Sign out
-      </button>
-    </div>
+    </main>
   );
 }
