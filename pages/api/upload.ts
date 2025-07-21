@@ -49,12 +49,6 @@ function chunkText(text: string, size = 500): string[] {
   return chunks;
 }
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
   credentials: {
@@ -62,6 +56,12 @@ const s3 = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
 });
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {

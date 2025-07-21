@@ -28,18 +28,36 @@ export default function HomePage() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    const data = await res.json();
-    setUploading(false);
-    if (data.success) {
-      setMessage("File uploaded and parsed successfully!");
-      setParsedText(data.parsedText || "");
-    } else {
-      setMessage(data.error || "Upload failed.");
+      if (!res.ok) {
+        let errorMsg = "Upload failed.";
+        try {
+          const errorData = await res.json();
+          errorMsg = errorData.error || errorMsg;
+        } catch {
+          // If response is not JSON, keep default errorMsg
+        }
+        setMessage(errorMsg);
+        setUploading(false);
+        return; // Cancel further processing
+      }
+
+      const data = await res.json();
+      setUploading(false);
+      if (data.success) {
+        setMessage("File uploaded and parsed successfully!");
+        setParsedText(data.parsedText || "");
+      } else {
+        setMessage(data.error || "Upload failed.");
+      }
+    } catch (err) {
+      setUploading(false);
+      setMessage("Network error or server unavailable.");
     }
   };
 
