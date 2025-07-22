@@ -45,11 +45,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Find the most similar chunk
   let bestScore = -Infinity;
   let bestChunk = "";
+  let bestEntry = null;
   for (const entry of userEmbeddings) {
     const score = cosineSimilarity(questionEmbedding, entry.embedding);
     if (score > bestScore) {
       bestScore = score;
       bestChunk = entry.chunk;
+      bestEntry = entry;
     }
   }
 
@@ -60,6 +62,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       { role: "system", content: "You are a helpful assistant. Answer the user's question based on the provided context." },
       { role: "user", content: `Context: ${bestChunk}\n\nQuestion: ${question}` },
     ],
+  });
+
+  const sourceFile = bestEntry?.docKey || "unknown";
+  const sourceSnippet = bestChunk || "";
+
+  await db.collection("chats").insertOne({
+    user: session.user.email,
+    question,
+    answer: completion.choices[0].message?.content ?? "",
+    sourceFile,
+    sourceSnippet,
+    timestamp: new Date(),
   });
 
   return res.status(200).json({ answer: completion.choices[0].message?.content ?? "" });

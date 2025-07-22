@@ -11,6 +11,9 @@ export default function HomePage() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [asking, setAsking] = useState(false);
+  const [showChatHistory, setShowChatHistory] = useState(false);
+  const [chatHistory, setChatHistory] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target.files?.[0] || null);
@@ -73,6 +76,23 @@ export default function HomePage() {
     const data = await res.json();
     setAsking(false);
     setAnswer(data.answer || "No answer found.");
+  };
+
+  const fetchChatHistory = async () => {
+    setLoadingHistory(true);
+    const res = await fetch("/api/chat-history");
+    const data = await res.json();
+    setChatHistory(data.chats || []);
+    setLoadingHistory(false);
+  };
+
+  const clearChatHistory = async () => {
+    await fetch("/api/chat-history", { method: "DELETE" });
+    fetchChatHistory();
+  };
+
+  const downloadChatHistory = () => {
+    window.open("/api/chat-history?download=1", "_blank");
   };
 
   if (status === "loading") return <div className="flex items-center justify-center min-h-screen text-lg">Loading...</div>;
@@ -147,6 +167,13 @@ export default function HomePage() {
             >
               {asking ? "Asking..." : "Ask"}
             </button>
+            <button
+              className="mt-2 w-full bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg py-2 text-sm font-medium transition"
+              style={{ fontWeight: 500 }}
+              onClick={() => { setShowChatHistory(true); fetchChatHistory(); }}
+            >
+              View Chat History
+            </button>
           </div>
           {answer && (
             <div className="mt-6">
@@ -186,6 +213,34 @@ export default function HomePage() {
           Sign out
         </button>
       </div>
+      {showChatHistory && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
+            <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" onClick={() => setShowChatHistory(false)}>✕</button>
+            <h2 className="text-lg font-bold mb-4">Chat History</h2>
+            {loadingHistory ? (
+              <div>Loading...</div>
+            ) : (
+              <div className="max-h-80 overflow-y-auto space-y-4">
+                {chatHistory.length === 0 && <div className="text-gray-500">No chat history yet.</div>}
+                {chatHistory.map((chat, idx) => (
+                  <div key={idx} className="border-b pb-2 leading-relaxed">
+                    <div className="text-xs text-gray-400">{new Date(chat.timestamp).toLocaleString()}</div>
+                    <div className="font-semibold">Q: {chat.question}</div>
+                    <div className="text-gray-700">A: {chat.answer}</div>
+                    <div className="text-xs text-gray-500 mt-1">Source: {chat.sourceFile}</div>
+                    {/* <div className="text-xs text-gray-400">{chat.sourceSnippet.slice(0, 100)}...</div> */}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2 mt-4">
+              <button className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs" onClick={clearChatHistory}>Clear History</button>
+              <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-xs" onClick={downloadChatHistory}>Download</button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
