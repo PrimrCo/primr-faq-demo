@@ -48,13 +48,11 @@ export default function HomePage() {
         try {
           const errorData = await res.json();
           errorMsg = errorData.error || errorMsg;
-        } catch {
-          // If response is not JSON, keep default errorMsg
-        }
+        } catch {}
         setMessage(errorMsg);
         setMessageType("error");
         setUploading(false);
-        return; // Cancel further processing
+        return;
       }
 
       const data = await res.json();
@@ -63,7 +61,7 @@ export default function HomePage() {
         setMessage("File uploaded and parsed successfully!");
         setMessageType("success");
         setParsedText(data.parsedText || "");
-        fetchFiles(); // <-- add this line
+        fetchFiles();
       } else {
         setMessage(data.error || "Upload failed.");
         setMessageType("error");
@@ -291,7 +289,6 @@ export default function HomePage() {
                     <div className="font-semibold">Q: {chat.question}</div>
                     <div className="text-gray-700">A: {chat.answer}</div>
                     <div className="text-xs text-gray-500 mt-1">Source: {chat.sourceFile}</div>
-                    {/* <div className="text-xs text-gray-400">{chat.sourceSnippet.slice(0, 100)}...</div> */}
                   </div>
                 ))}
               </div>
@@ -335,7 +332,6 @@ export default function HomePage() {
                 ))}
               </ul>
             )}
-            {/* Preview Modal (nested) */}
             {preview && (
               <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
