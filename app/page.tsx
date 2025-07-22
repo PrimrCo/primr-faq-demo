@@ -1,12 +1,13 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function HomePage() {
   const { data: session, status } = useSession();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
   const [parsedText, setParsedText] = useState("");
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
@@ -14,6 +15,11 @@ export default function HomePage() {
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [chatHistory, setChatHistory] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [files, setFiles] = useState<any[]>([]);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [previewFile, setPreviewFile] = useState<string | null>(null);
+  const [loadingFiles, setLoadingFiles] = useState(false);
+  const [showFileModal, setShowFileModal] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target.files?.[0] || null);
@@ -46,6 +52,7 @@ export default function HomePage() {
           // If response is not JSON, keep default errorMsg
         }
         setMessage(errorMsg);
+        setMessageType("error");
         setUploading(false);
         return; // Cancel further processing
       }
@@ -54,13 +61,17 @@ export default function HomePage() {
       setUploading(false);
       if (data.success) {
         setMessage("File uploaded and parsed successfully!");
+        setMessageType("success");
         setParsedText(data.parsedText || "");
+        fetchFiles(); // <-- add this line
       } else {
         setMessage(data.error || "Upload failed.");
+        setMessageType("error");
       }
     } catch (err) {
       setUploading(false);
       setMessage("Network error or server unavailable.");
+      setMessageType("error");
     }
   };
 
@@ -94,6 +105,42 @@ export default function HomePage() {
   const downloadChatHistory = () => {
     window.open("/api/chat-history?download=1", "_blank");
   };
+
+  const fetchFiles = async () => {
+    setLoadingFiles(true);
+    const res = await fetch("/api/files");
+    const data = await res.json();
+    setFiles(data.files || []);
+    setLoadingFiles(false);
+  };
+
+  const handlePreview = async (key: string) => {
+    setPreviewFile(key);
+    setPreview("Loading...");
+    const res = await fetch(`/api/files/preview?key=${encodeURIComponent(key)}`);
+    const data = await res.json();
+    setPreview(data.preview || "No preview available.");
+  };
+
+  const handleDelete = async (key: string) => {
+    if (!window.confirm("Delete this file? This cannot be undone.")) return;
+    await fetch(`/api/files?key=${encodeURIComponent(key)}`, { method: "DELETE" });
+    fetchFiles();
+    if (previewFile === key) {
+      setPreview(null);
+      setPreviewFile(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchFiles();
+  }, []);
+
+  useEffect(() => {
+    if (!uploading && file === null) {
+      fetchFiles();
+    }
+  }, [uploading, file]);
 
   if (status === "loading") return <div className="flex items-center justify-center min-h-screen text-lg">Loading...</div>;
   if (!session)
@@ -133,8 +180,13 @@ export default function HomePage() {
           </button>
         </div>
         {message && (
-          <div className="mt-4 w-full text-center px-4 py-2 rounded-lg font-medium
-            bg-red-50 text-[var(--brand-red)] border border-red-200 shadow-sm">
+          <div
+            className={`mt-4 w-full text-center px-4 py-2 rounded-lg font-medium border shadow-sm
+              ${messageType === "success"
+                ? "bg-green-50 text-green-700 border-green-200"
+                : "bg-red-50 text-[var(--brand-red)] border-red-200"
+              }`}
+          >
             {message}
           </div>
         )}
@@ -166,6 +218,16 @@ export default function HomePage() {
               disabled={asking}
             >
               {asking ? "Asking..." : "Ask"}
+            </button>
+            <button
+              className="mt-2 w-full bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg py-2 text-sm font-medium transition"
+              style={{ fontWeight: 500 }}
+              onClick={() => {
+                fetchFiles();
+                setShowFileModal(true);
+              }}
+            >
+              Manage Files
             </button>
             <button
               className="mt-2 w-full bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg py-2 text-sm font-medium transition"
@@ -238,6 +300,51 @@ export default function HomePage() {
               <button className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs" onClick={clearChatHistory}>Clear History</button>
               <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-xs" onClick={downloadChatHistory}>Download</button>
             </div>
+          </div>
+        </div>
+      )}
+      {showFileModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
+            <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" onClick={() => setShowFileModal(false)}>✕</button>
+            <h2 className="font-semibold text-[var(--brand-blue)] mb-4">Your Files</h2>
+            {loadingFiles ? (
+              <div>Loading files...</div>
+            ) : files.length === 0 ? (
+              <div className="text-gray-400 text-sm">No files uploaded yet.</div>
+            ) : (
+              <ul className="space-y-2">
+                {files.map((file) => (
+                  <li key={file.key} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded px-3 py-2">
+                    <span className="truncate">{file.name}</span>
+                    <div className="flex gap-2">
+                      <button
+                        className="text-[var(--brand-blue)] underline text-xs"
+                        onClick={() => handlePreview(file.key)}
+                      >
+                        Preview
+                      </button>
+                      <button
+                        className="text-red-600 underline text-xs"
+                        onClick={() => handleDelete(file.key)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {/* Preview Modal (nested) */}
+            {preview && (
+              <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
+                  <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" onClick={() => setPreview(null)}>✕</button>
+                  <h3 className="font-bold mb-2">Preview: {files.find(f => f.key === previewFile)?.name}</h3>
+                  <div className="text-sm text-gray-800 whitespace-pre-wrap max-h-80 overflow-auto">{preview}</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
