@@ -70,32 +70,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: "Failed to embed question." });
   }
 
-  // 4. Find the most similar chunk
-  let bestScore = -Infinity;
-  let bestChunk = "";
-  let bestEntry = null;
-  for (const entry of userEmbeddings) {
-    if (!entry.embedding || !Array.isArray(entry.embedding)) continue;
-    const score = cosineSimilarity(questionEmbedding, entry.embedding);
-    if (score > bestScore) {
-      bestScore = score;
-      bestChunk = entry.chunk;
-      bestEntry = entry;
-    }
-  }
+  // 4. Find the top N most similar chunks
+  const TOP_N = 5;
+  const scoredChunks = userEmbeddings
+    .filter(entry => entry.embedding && Array.isArray(entry.embedding))
+    .map(entry => ({
+      ...entry,
+      score: cosineSimilarity(questionEmbedding, entry.embedding),
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, TOP_N);
 
-  if (!bestChunk) {
+  if (!scoredChunks.length) {
     return res.status(404).json({ error: "No relevant content found in your documents for this question." });
   }
 
-  // 5. Use OpenAI completion to answer the question based on the best chunk
+  // Concatenate top N chunks for context
+  const context = scoredChunks.map(entry =>
+    `From file: ${entry.docKey}\n${entry.chunk}`
+  ).join("\n\n---\n\n");
+
+  // 5. Use OpenAI completion to answer the question based on the best chunks
   let completion;
   try {
     completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: "You are a helpful assistant. Answer the user's question based on the provided context." },
-        { role: "user", content: `Context: ${bestChunk}\n\nQuestion: ${question}` },
+        { role: "user", content: `Context:\n${context}\n\nQuestion: ${question}` },
       ],
     });
   } catch (e) {
@@ -104,16 +106,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const answer = completion.choices[0].message?.content ?? "";
-  const sourceFile = bestEntry?.docKey || "unknown";
-  const sourceSnippet = bestChunk || "";
+  const sourceFiles = scoredChunks.map(entry => entry.docKey);
 
-  // 6. Store the Q&A in chat history
   await db.collection("chats").insertOne({
     user: session.user.email,
     question,
     answer,
-    sourceFile,
-    sourceSnippet,
+    sourceFiles,
     eventId: new ObjectId(eventId),
     timestamp: new Date(),
   });

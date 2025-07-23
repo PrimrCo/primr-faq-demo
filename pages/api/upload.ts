@@ -8,6 +8,7 @@ import clientPromise from "../../lib/mongo";
 import { ObjectId } from "mongodb";
 import path from "path";
 import OpenAI from "openai";
+import { extractTextFromDocx } from "../../lib/extractTextFromDocx";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -89,7 +90,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
       // Extract text from file and create embeddings
-      const fileText = fs.readFileSync(file.filepath, "utf-8"); // Assuming the file is text-based
+      let fileText = "";
+      if (file.originalFilename.endsWith(".docx")) {
+        fileText = await extractTextFromDocx(file.filepath);
+      } else if (file.originalFilename.endsWith(".md") || file.originalFilename.endsWith(".txt")) {
+        fileText = fs.readFileSync(file.filepath, "utf-8");
+      } else {
+        return res.status(400).json({ error: "Unsupported file type" });
+      }
       const chunks = splitTextIntoChunks(fileText); // Implement this function
 
       for (const chunk of chunks) {
