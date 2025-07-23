@@ -1,6 +1,8 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
+import EventSelector from "../components/EventSelector";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 export default function HomePage() {
   const { data: session, status } = useSession();
@@ -20,6 +22,10 @@ export default function HomePage() {
   const [previewFile, setPreviewFile] = useState<string | null>(null);
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [showFileModal, setShowFileModal] = useState(false);
+  const [eventList, setEventList] = useState<any[]>([]);
+  const [event, setEvent] = useState<any | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [error, setError] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target.files?.[0] || null);
@@ -29,13 +35,14 @@ export default function HomePage() {
   };
 
   const handleUpload = async () => {
-    if (!file) return setMessage("Please select a file.");
+    if (!file || !event?._id) return setMessage("Please select a file and event.");
     setUploading(true);
     setMessage("");
     setParsedText("");
     setAnswer("");
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("eventId", event._id);
 
     try {
       const res = await fetch("/api/upload", {
@@ -74,13 +81,13 @@ export default function HomePage() {
   };
 
   const handleAsk = async () => {
-    if (!question.trim()) return;
+    if (!question.trim() || !event?._id) return;
     setAsking(true);
     setAnswer("");
     const res = await fetch("/api/faq", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question }),
+      body: JSON.stringify({ question, eventId: event._id }),
     });
     const data = await res.json();
     setAsking(false);
@@ -88,8 +95,9 @@ export default function HomePage() {
   };
 
   const fetchChatHistory = async () => {
+    if (!event?._id) return;
     setLoadingHistory(true);
-    const res = await fetch("/api/chat-history");
+    const res = await fetch(`/api/chat-history?eventId=${encodeURIComponent(event._id)}`);
     const data = await res.json();
     setChatHistory(data.chats || []);
     setLoadingHistory(false);
@@ -105,8 +113,9 @@ export default function HomePage() {
   };
 
   const fetchFiles = async () => {
+    if (!event?._id) return;
     setLoadingFiles(true);
-    const res = await fetch("/api/files");
+    const res = await fetch(`/api/files?eventId=${encodeURIComponent(event._id)}`);
     const data = await res.json();
     setFiles(data.files || []);
     setLoadingFiles(false);
@@ -121,8 +130,9 @@ export default function HomePage() {
   };
 
   const handleDelete = async (key: string) => {
+    if (!event?._id) return;
     if (!window.confirm("Delete this file? This cannot be undone.")) return;
-    await fetch(`/api/files?key=${encodeURIComponent(key)}`, { method: "DELETE" });
+    await fetch(`/api/files?key=${encodeURIComponent(key)}&eventId=${encodeURIComponent(event._id)}`, { method: "DELETE" });
     fetchFiles();
     if (previewFile === key) {
       setPreview(null);
@@ -132,6 +142,23 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchFiles();
+  }, [event]);
+
+  useEffect(() => {
+    fetch("/api/events")
+      .then(res => res.json())
+      .then(data => {
+        setEventList(data.events || []);
+        // Restore selected event from localStorage
+        const savedId = localStorage.getItem("selectedEventId");
+        if (savedId) {
+          const found = (data.events || []).find((ev: any) => ev._id === savedId);
+          if (found) {
+            setSelectedEvent(found);
+            setEvent(found);
+          }
+        }
+      });
   }, []);
 
   useEffect(() => {
@@ -139,6 +166,19 @@ export default function HomePage() {
       fetchFiles();
     }
   }, [uploading, file]);
+
+  useEffect(() => {
+    if (!selectedEvent && !file) {
+      setError("Please select a file and event.");
+    } else if (!selectedEvent) {
+      setError("Please select an event.");
+    } else if (!file) {
+      setError("Please select a file.");
+    } else {
+      setError("");
+      // proceed with upload or Q&A
+    }
+  }, [selectedEvent, file]);
 
   if (status === "loading") return <div className="flex items-center justify-center min-h-screen text-lg">Loading...</div>;
   if (!session)
@@ -155,13 +195,41 @@ export default function HomePage() {
         </button>
       </div>
     );
-
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-[var(--brand-bg)] px-4">
       <div className="w-full max-w-xl bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center">
         <img src="/images/logo-v1.jpg" alt="Primr Logo" className="w-20 h-20 mb-4 rounded-lg object-contain shadow" />
         <h1 className="text-2xl font-bold mb-1 text-[var(--brand-red)] tracking-tight">Upload your FAQ document</h1>
         <p className="mb-6 text-gray-500 text-center">Supported: .md, .txt, .pdf, .docx, .csv, .xlsx</p>
+
+        {/* Event Selector Info Block */}
+        <div className="w-full mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <svg className="w-6 h-6 text-[var(--brand-blue)]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 16v-4m0-4h.01" />
+            </svg>
+            <span className="font-semibold text-[var(--brand-blue)] text-base">Select or Create an Event</span>
+          </div>
+          <div className="text-gray-600 text-sm mb-3">
+            All uploads, questions, and files are grouped by event. <span className="font-medium text-gray-700">Select an event to continue.</span>
+          </div>
+          <EventSelector
+            selectedEvent={selectedEvent}
+            onSelect={event => {
+              setSelectedEvent(event);
+              setEvent(event);
+              setMessage("");
+              setError("");
+              if (event) {
+                localStorage.setItem("selectedEventId", event._id);
+              } else {
+                localStorage.removeItem("selectedEventId");
+              }
+            }}
+          />
+        </div>
+
         <div className="w-full flex flex-col gap-3">
           <input
             type="file"
@@ -172,7 +240,7 @@ export default function HomePage() {
           <button
             className="w-full bg-[var(--brand-blue)] hover:bg-blue-700 transition text-white py-2 rounded-lg font-semibold shadow disabled:opacity-60"
             onClick={handleUpload}
-            disabled={uploading}
+            disabled={uploading || !selectedEvent}
           >
             {uploading ? "Uploading..." : "Upload"}
           </button>
@@ -273,6 +341,7 @@ export default function HomePage() {
           Sign out
         </button>
       </div>
+
       {showChatHistory && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
@@ -312,18 +381,18 @@ export default function HomePage() {
             ) : (
               <ul className="space-y-2">
                 {files.map((file) => (
-                  <li key={file.key} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded px-3 py-2">
-                    <span className="truncate">{file.name}</span>
+                  <li key={file.docKey}>
+                    {file.originalFilename}
                     <div className="flex gap-2">
                       <button
                         className="text-[var(--brand-blue)] underline text-xs"
-                        onClick={() => handlePreview(file.key)}
+                        onClick={() => handlePreview(file.docKey)}
                       >
                         Preview
                       </button>
                       <button
                         className="text-red-600 underline text-xs"
-                        onClick={() => handleDelete(file.key)}
+                        onClick={() => handleDelete(file.docKey)}
                       >
                         Delete
                       </button>

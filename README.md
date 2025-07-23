@@ -20,6 +20,8 @@ A Next.js project for uploading, parsing, and querying FAQ documents using OpenA
 - [Example UI Integration](#example-ui-integration)
 - [FAQ](#faq)
 - [Troubleshooting](#troubleshooting)
+- [Event Grouping](#event-grouping)
+- [Commands](#commands)
 
 ---
 
@@ -233,6 +235,41 @@ A: Files are uploaded to your configured S3 bucket, organized by user email.
 
 - **MongoDB errors:**
   - Ensure your `MONGODB_URI` is correct and the database is accessible.
+
+---
+
+## Event Grouping
+
+- All uploaded documents and Q&A are grouped by "Event".
+- You can create, select, and manage events from the UI.
+- Uploaded files, chat history, and answers are always scoped to the currently selected event.
+- This allows you to keep documents and conversations organized by project, meeting, or topic.
+
+### How to Use Events
+
+1. **Create or select an event** using the event selector in the UI.
+2. **Upload documents** to the selected event.
+3. **Ask questions** and view chat history, all scoped to the current event.
+4. **Switch events** to see different sets of files and Q&A.
+
+---
+
+## Commands
+
+### `/ask-primr check-environment`
+
+Use this command to verify your environment configuration.
+It checks for required environment variables and prints their status.
+
+**Usage:**
+```sh
+npx ask-primr check-environment
+```
+
+**What it does:**
+- Verifies all required environment variables are set.
+- Prints a summary of your configuration.
+- Helps debug setup issues before running the app.
 
 ---
 

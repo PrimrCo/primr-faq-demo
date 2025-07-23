@@ -22,7 +22,10 @@ function streamToString(stream: Readable): Promise<string> {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions);
+  let session = await getServerSession(req, res, authOptions);
+  if (process.env.NODE_ENV === "test" && req.headers["x-test-user"]) {
+    session = { user: { email: req.headers["x-test-user"] } };
+  }
   if (!session || !session.user?.email) {
     return res.status(401).json({ error: "Unauthorized" });
   }

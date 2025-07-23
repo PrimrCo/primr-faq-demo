@@ -2,9 +2,15 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth/[...nextauth]";
 import clientPromise from "../../lib/mongo";
+import { ObjectId } from "mongodb";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions);
+    console.log("NODE_ENV:", process.env.NODE_ENV, "x-test-user:", req.headers["x-test-user"]);
+
+  let session = await getServerSession(req, res, authOptions);
+  if (process.env.NODE_ENV === "test" && req.headers["x-test-user"]) {
+    session = { user: { email: req.headers["x-test-user"] } };
+  }
   if (!session || !session.user?.email) {
     return res.status(401).json({ error: "Unauthorized" });
   }
@@ -14,23 +20,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const collection = db.collection("chats");
 
   if (req.method === "GET") {
-    const chats = await collection.find({ user: email }).sort({ timestamp: -1 }).toArray();
-    if (req.query.download) {
-      // Format as plain text
-      const lines = chats.map(
-        (c) =>
-          `Time: ${new Date(c.timestamp).toLocaleString()}\nQ: ${c.question}\nA: ${c.answer}\nSource: ${c.sourceFile}\n`
-      );
-      const txt = lines.join("\n----------------------\n\n");
-      res.setHeader("Content-Disposition", "attachment; filename=chat-history.txt");
-      res.setHeader("Content-Type", "text/plain; charset=utf-8");
-      return res.status(200).send(txt);
+    const { eventId } = req.query;
+    if (!eventId || typeof eventId !== "string") {
+      return res.status(400).json({ error: "Missing eventId" });
     }
-    return res.status(200).json({ chats });
+    try {
+      const chats = await db.collection("chats").find({
+        user: session.user.email,
+        eventId: new ObjectId(eventId),
+      }).toArray();
+      return res.status(200).json({ chats });
+    } catch (e) {
+      return res.status(400).json({ error: "Invalid eventId" });
+    }
   }
 
   if (req.method === "DELETE") {
-    await collection.deleteMany({ user: email });
+    const { eventId } = req.query;
+    if (!eventId || typeof eventId !== "string") {
+      return res.status(400).json({ error: "Missing eventId" });
+    }
+    await collection.deleteMany({ user: email, eventId: new ObjectId(eventId) });
     return res.status(200).json({ success: true });
   }
 
