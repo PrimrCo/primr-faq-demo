@@ -3,6 +3,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import EventSelector from "../components/EventSelector";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import type { PrimrEvent } from "../types/primr-event";
 
 export default function HomePage() {
   const { data: session, status } = useSession();
@@ -22,9 +23,9 @@ export default function HomePage() {
   const [previewFile, setPreviewFile] = useState<string | null>(null);
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [showFileModal, setShowFileModal] = useState(false);
-  const [eventList, setEventList] = useState<any[]>([]);
-  const [event, setEvent] = useState<any | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [eventList, setEventList] = useState<PrimrEvent[]>([]);
+  const [event, setEvent] = useState<PrimrEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<PrimrEvent | null>(null);
   const [error, setError] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,7 +217,7 @@ export default function HomePage() {
           </div>
           <EventSelector
             selectedEvent={selectedEvent}
-            onSelect={event => {
+            onSelect={(event: PrimrEvent | null) => {
               setSelectedEvent(event);
               setEvent(event);
               setMessage("");

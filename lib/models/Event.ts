@@ -10,3 +10,12 @@ export interface Event {
   createdAt: Date;
   updatedAt: Date;
 }
+
+/**
+ * Primitive Event model with limited fields.
+ */
+export interface PrimrEvent {
+  _id: string;
+  name: string;
+  // ...other fields as needed
+}

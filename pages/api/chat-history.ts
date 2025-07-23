@@ -4,12 +4,21 @@ import { authOptions } from "./auth/[...nextauth]";
 import clientPromise from "../../lib/mongo";
 import { ObjectId } from "mongodb";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
     console.log("NODE_ENV:", process.env.NODE_ENV, "x-test-user:", req.headers["x-test-user"]);
 
   let session = await getServerSession(req, res, authOptions);
   if (process.env.NODE_ENV === "test" && req.headers["x-test-user"]) {
-    session = { user: { email: req.headers["x-test-user"] } };
+    const testUser = Array.isArray(req.headers["x-test-user"])
+      ? req.headers["x-test-user"][0]
+      : req.headers["x-test-user"];
+    session = {
+      user: { email: testUser },
+      expires: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    };
   }
   if (!session || !session.user?.email) {
     return res.status(401).json({ error: "Unauthorized" });

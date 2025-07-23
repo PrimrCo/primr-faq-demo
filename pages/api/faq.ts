@@ -16,6 +16,22 @@ function cosineSimilarity(a: number[], b: number[]) {
   return dot / (normA * normB);
 }
 
+interface EmbeddingEntry {
+  docKey: string;
+  chunk: string;
+  embedding: number[];
+  [key: string]: any; // for other fields like _id, user, eventId, etc.
+}
+
+function isEmbeddingEntry(entry: any): entry is EmbeddingEntry {
+  return (
+    typeof entry === "object" &&
+    typeof entry.docKey === "string" &&
+    typeof entry.chunk === "string" &&
+    Array.isArray(entry.embedding)
+  );
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -23,7 +39,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   let session = await getServerSession(req, res, authOptions);
   if (process.env.NODE_ENV === "test" && req.headers["x-test-user"]) {
-    session = { user: { email: req.headers["x-test-user"] } };
+    const testUser = Array.isArray(req.headers["x-test-user"])
+      ? req.headers["x-test-user"][0]
+      : req.headers["x-test-user"];
+    session = {
+      user: { email: testUser },
+      expires: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    };
   }
   if (!session || !session.user?.email) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -48,10 +70,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!event) return res.status(404).json({ error: "Event not found" });
 
   // 2. Retrieve all embeddings for this event/user
-  const userEmbeddings = await db.collection("embeddings").find({
+  const rawEmbeddings = await db.collection("embeddings").find({
     user: session.user.email,
     eventId: new ObjectId(eventId),
   }).toArray();
+
+  const userEmbeddings = rawEmbeddings.filter(isEmbeddingEntry) as unknown as EmbeddingEntry[];
 
   if (!userEmbeddings.length) {
     return res.status(404).json({ error: "No document embeddings found for this event. Please upload and parse a document first." });
@@ -81,11 +105,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .sort((a, b) => b.score - a.score)
     .slice(0, TOP_N);
 
-  if (!scoredChunks.length) {
-    return res.status(404).json({ error: "No relevant content found in your documents for this question." });
-  }
-
-  // Concatenate top N chunks for context
   const context = scoredChunks.map(entry =>
     `From file: ${entry.docKey}\n${entry.chunk}`
   ).join("\n\n---\n\n");

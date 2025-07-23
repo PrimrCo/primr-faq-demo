@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import type { PrimrEvent } from "../types/primr-event";
 
 interface Event {
   _id: string;
@@ -6,8 +7,8 @@ interface Event {
 }
 
 interface EventSelectorProps {
-  selectedEvent: Event | null;
-  onSelect: (event: Event | null) => void;
+  selectedEvent: PrimrEvent | null;
+  onSelect: (event: PrimrEvent | null) => void;
 }
 
 const EventSelector: React.FC<EventSelectorProps> = ({ selectedEvent, onSelect }) => {

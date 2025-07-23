@@ -35,7 +35,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   let session = await getServerSession(req, res, authOptions);
   if (process.env.NODE_ENV === "test" && req.headers["x-test-user"]) {
-    session = { user: { email: req.headers["x-test-user"] } };
+    const testUser = Array.isArray(req.headers["x-test-user"])
+      ? req.headers["x-test-user"][0]
+      : req.headers["x-test-user"];
+    session = {
+      user: { email: testUser },
+      expires: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    };
   }
   if (!session || !session.user?.email) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -64,7 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Define the S3 key
-    const key = `${session.user.email}/${Date.now()}_${file.originalFilename}`;
+    const key = `${session.user!.email}/${Date.now()}_${file.originalFilename}`;
 
     try {
       // Upload to S3
@@ -80,7 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const client = await clientPromise;
       const db = client.db();
       await db.collection("files").insertOne({
-        user: session.user.email,
+        user: session.user!.email,
         docKey: key,
         eventId: new ObjectId(eventIdStr),
         originalFilename: file.originalFilename,
@@ -91,9 +97,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Extract text from file and create embeddings
       let fileText = "";
-      if (file.originalFilename.endsWith(".docx")) {
+      if (file.originalFilename!.endsWith(".docx")) {
         fileText = await extractTextFromDocx(file.filepath);
-      } else if (file.originalFilename.endsWith(".md") || file.originalFilename.endsWith(".txt")) {
+      } else if (file.originalFilename!.endsWith(".md") || file.originalFilename!.endsWith(".txt")) {
         fileText = fs.readFileSync(file.filepath, "utf-8");
       } else {
         return res.status(400).json({ error: "Unsupported file type" });
@@ -107,7 +113,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
         const embedding = embeddingResponse.data[0].embedding;
         await db.collection("embeddings").insertOne({
-          user: session.user.email,
+          user: session.user!.email,
           eventId: new ObjectId(eventIdStr),
           docKey: key,
           chunk,
