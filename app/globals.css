@@ -8,13 +8,17 @@
   --brand-yellow: #f4c000;
   --brand-text: #1a1a1a;
   --brand-bg: #F1EFEE;
+  --brand-light-blue: #e6f3ff;
+  --brand-light-red: #fef2f2;
+  --brand-gray: #6b7280;
+  --brand-light-gray: #f9fafb;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "SF Mono", Monaco, Inconsolata, "Roboto Mono", monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,5 +31,24 @@
 body {
   background: var(--brand-bg);
   color: var(--brand-text);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-gray);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-blue);
 }
