@@ -7,24 +7,8 @@ mode: ask
 THe FAQ demo is build for event planners that might have to manage events with tons of volunteers (like a tech conference). The volunteers should be able to use the faq demo app to ask questions that will be answered will all of the documentation uploaded in the application.
 
 ## 🎯 Task
-Expected behavior:
-There are two events Event A and Event B.
+Add support to the application for uploading .pdf files. The application should be able to extract text from the PDF and create embeddings for it, similar to how it currently handles `.docx`, `.md`, and `.txt` files.
 
-Each event had it's own set of files.
-
-When a volunteer asks a question, the application will search for the answer in the files uploaded for that event using RAG.
-
-Actual behavior:
-- the application is not searching for answer across all the files uploaded for the event. it seems to only be using one file to search for the answer. For example, if the question is "What is the schedule for Event A?" it should search across all files uploaded for Event A, not just one file.
-- The application doesn't seem to be switching context based on the event selected. If I select Event A, it should only search for answers in files uploaded for Event A, and similarly for Event B.
-
-## ☑️ Requirements
-- List every functional requirement, e.g.
-  - Must support Node ≥14, detect via `process.version`
-  - Check `npm` vs. `yarn` installation
-  - Detect running Docker daemon, MongoDB URI connectivity
-  - Return JSON with fields `{ status: string, fixes: string[] }`
-- Include any UI/output format rules (Slack message blocks, JSON shape, etc.)
 
 ## 🚧 Constraints
 - **Do not** modify any existing files except to _add_ the new feature.
