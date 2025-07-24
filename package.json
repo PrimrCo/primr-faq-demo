@@ -2,11 +2,15 @@
   "name": "nextjs",
   "version": "0.1.0",
   "private": true,
+  "bin": {
+    "ask-primr": "./bin/ask-primr.js"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "ask-primr": "npx tsx scripts/check-environment.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.848.0",
