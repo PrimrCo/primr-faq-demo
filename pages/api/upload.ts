@@ -6,9 +6,10 @@ import { authOptions } from "./auth/[...nextauth]";
 import fs from "fs";
 import clientPromise from "../../lib/mongo";
 import { ObjectId } from "mongodb";
-import path from "path";
 import OpenAI from "openai";
 import { extractTextFromDocx } from "../../lib/extractTextFromDocx";
+import { extractTextFromPdf } from "../../lib/extractTextFromPdf";
+import { extractTextFromCsv, extractTextFromXlsx } from "../../lib/extractTextFromExcel";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -97,10 +98,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Extract text from file and create embeddings
       let fileText = "";
-      if (file.originalFilename!.endsWith(".docx")) {
+      const filename = file.originalFilename!.toLowerCase();
+      
+      if (filename.endsWith(".docx")) {
         fileText = await extractTextFromDocx(file.filepath);
-      } else if (file.originalFilename!.endsWith(".md") || file.originalFilename!.endsWith(".txt")) {
+      } else if (filename.endsWith(".md") || filename.endsWith(".txt")) {
         fileText = fs.readFileSync(file.filepath, "utf-8");
+      } else if (filename.endsWith(".pdf")) {
+        fileText = await extractTextFromPdf(file.filepath);
+      } else if (filename.endsWith(".csv")) {
+        fileText = await extractTextFromCsv(file.filepath);
+      } else if (filename.endsWith(".xlsx") || filename.endsWith(".xls")) {
+        fileText = await extractTextFromXlsx(file.filepath);
       } else {
         return res.status(400).json({ error: "Unsupported file type" });
       }
@@ -125,7 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Clean up temp file
       fs.unlinkSync(file.filepath);
 
-      return res.status(200).json({ success: true, key });
+      return res.status(200).json({ success: true, key, parsedText: fileText });
     } catch (e) {
       console.error("Upload error:", e);
       return res.status(500).json({ error: "An error occurred during upload." });
