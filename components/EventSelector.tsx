@@ -27,7 +27,8 @@ const EventSelector: React.FC<EventSelectorProps> = ({ selectedEvent, onSelect }
       const res = await fetch("/api/events");
       const data = await res.json();
       setEvents(data.events || []);
-    } catch (e) {
+    } catch (error) {
+      console.error('Failed to load events:', error);
       setError("Failed to load events.");
     } finally {
       setLoading(false);
@@ -50,7 +51,8 @@ const EventSelector: React.FC<EventSelectorProps> = ({ selectedEvent, onSelect }
       setEvents((prev) => [...prev, event]);
       onSelect(event);
       setNewEventName("");
-    } catch (e) {
+    } catch (error) {
+      console.error('Failed to create event:', error);
       setError("Could not create event.");
     } finally {
       setLoading(false);

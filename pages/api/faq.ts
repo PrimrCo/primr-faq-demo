@@ -20,15 +20,19 @@ interface EmbeddingEntry {
   docKey: string;
   chunk: string;
   embedding: number[];
-  [key: string]: any; // for other fields like _id, user, eventId, etc.
+  _id?: unknown;
+  user?: string;
+  eventId?: unknown;
+  [key: string]: unknown; // for other fields like _id, user, eventId, etc.
 }
 
-function isEmbeddingEntry(entry: any): entry is EmbeddingEntry {
+function isEmbeddingEntry(entry: unknown): entry is EmbeddingEntry {
   return (
     typeof entry === "object" &&
-    typeof entry.docKey === "string" &&
-    typeof entry.chunk === "string" &&
-    Array.isArray(entry.embedding)
+    entry !== null &&
+    typeof (entry as EmbeddingEntry).docKey === "string" &&
+    typeof (entry as EmbeddingEntry).chunk === "string" &&
+    Array.isArray((entry as EmbeddingEntry).embedding)
   );
 }
 

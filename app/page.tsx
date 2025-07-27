@@ -514,7 +514,7 @@ export default function HomePage() {
                     onClick={() => setQuestion(q)}
                     className="w-full text-left text-sm text-[var(--brand-gray)] hover:text-[var(--brand-blue)] hover:bg-[var(--brand-light-blue)] p-2 rounded transition-colors"
                   >
-                    "                    &ldquo;{q}&rdquo;"
+                    &ldquo;{q}&rdquo;
                   </button>
                 ))}
               </div>
