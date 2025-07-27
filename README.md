@@ -370,7 +370,7 @@ npm run quality:report     # Generate detailed reports
 
 ### Quality Requirements
 
-- **Code Coverage**: Minimum 90% across lines, functions, branches, and statements
+- **Code Coverage**: Minimum 70% across lines, functions, branches, and statements
 - **Performance**: Response times must meet defined thresholds
 - **AI Quality**: Automated evaluation of response accuracy and relevance
 - **Cross-Browser**: Testing on Chrome, Firefox, and Safari

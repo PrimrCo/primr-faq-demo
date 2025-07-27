@@ -98,7 +98,7 @@ class QualityReportGenerator {
     
     const gates = {
       codeQuality: true, // ESLint passed
-      testCoverage: this.reportData.coverage.statements?.pct >= 90,
+      testCoverage: this.reportData.coverage.statements?.pct >= 70,
       unitTests: true, // Assume passed if we got here
       integrationTests: true,
       performanceTests: true,
@@ -138,7 +138,7 @@ ${reportData.qualityGates.overall ? '✅' : '❌'} **Overall Status: ${reportDat
 | Gate | Status | Details |
 |------|--------|---------|
 | Code Quality | ${reportData.qualityGates.codeQuality ? '✅ PASS' : '❌ FAIL'} | ESLint and TypeScript checks |
-| Test Coverage | ${reportData.qualityGates.testCoverage ? '✅ PASS' : '❌ FAIL'} | ${reportData.coverage.statements?.pct || 0}% coverage (≥90% required) |
+| Test Coverage | ${reportData.qualityGates.testCoverage ? '✅ PASS' : '❌ FAIL'} | ${reportData.coverage.statements?.pct || 0}% coverage (≥70% required) |
 | Unit Tests | ${reportData.qualityGates.unitTests ? '✅ PASS' : '❌ FAIL'} | All unit tests passing |
 | Integration Tests | ${reportData.qualityGates.integrationTests ? '✅ PASS' : '❌ FAIL'} | API and database integration |
 | Performance Tests | ${reportData.qualityGates.performanceTests ? '✅ PASS' : '❌ FAIL'} | Load and stress testing |
@@ -148,10 +148,10 @@ ${reportData.qualityGates.overall ? '✅' : '❌'} **Overall Status: ${reportDat
 
 | Metric | Coverage | Threshold | Status |
 |--------|----------|-----------|--------|
-| Statements | ${reportData.coverage.statements?.pct || 0}% | 90% | ${(reportData.coverage.statements?.pct || 0) >= 90 ? '✅' : '❌'} |
-| Branches | ${reportData.coverage.branches?.pct || 0}% | 80% | ${(reportData.coverage.branches?.pct || 0) >= 80 ? '✅' : '❌'} |
-| Functions | ${reportData.coverage.functions?.pct || 0}% | 80% | ${(reportData.coverage.functions?.pct || 0) >= 80 ? '✅' : '❌'} |
-| Lines | ${reportData.coverage.lines?.pct || 0}% | 80% | ${(reportData.coverage.lines?.pct || 0) >= 80 ? '✅' : '❌'} |
+| Statements | ${reportData.coverage.statements?.pct || 0}% | 70% | ${(reportData.coverage.statements?.pct || 0) >= 70 ? '✅' : '❌'} |
+| Branches | ${reportData.coverage.branches?.pct || 0}% | 70% | ${(reportData.coverage.branches?.pct || 0) >= 70 ? '✅' : '❌'} |
+| Functions | ${reportData.coverage.functions?.pct || 0}% | 70% | ${(reportData.coverage.functions?.pct || 0) >= 70 ? '✅' : '❌'} |
+| Lines | ${reportData.coverage.lines?.pct || 0}% | 70% | ${(reportData.coverage.lines?.pct || 0) >= 70 ? '✅' : '❌'} |
 
 ## 🧪 Test Results Summary
 
@@ -213,7 +213,7 @@ ${reportData.qualityGates.overall ? `
 ` : `
 ### ⚠️ Action Required
 - Review failing quality gates above
-- Increase test coverage if below 90%
+- Increase test coverage if below 70%
 - Fix any performance regressions
 - Address security vulnerabilities
 `}

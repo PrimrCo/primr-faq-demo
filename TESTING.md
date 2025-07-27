@@ -5,7 +5,7 @@ This repository includes a comprehensive testing and quality assurance framework
 ## 🎯 Overview
 
 The testing framework provides:
-- **>90% Code Coverage** requirement with automated quality gates
+- **70% Code Coverage** requirement with automated quality gates
 - **AI Quality Validation** for response accuracy, relevance, and bias detection
 - **Performance Testing** with load testing and regression detection
 - **End-to-End Testing** for critical user workflows
@@ -140,7 +140,7 @@ AWS_BUCKET_NAME=test-bucket
 The framework enforces quality gates that must pass for deployment:
 
 1. **Code Quality**: ESLint and TypeScript compilation
-2. **Test Coverage**: Minimum 90% coverage across all metrics
+2. **Test Coverage**: Minimum 70% coverage across all metrics
 3. **Unit Tests**: All unit tests must pass
 4. **Integration Tests**: API and database integration validation
 5. **Performance Tests**: Response time and throughput thresholds
@@ -223,7 +223,7 @@ The testing pipeline includes:
 3. **Performance Validation**: Load testing with regression detection
 4. **E2E Testing**: Cross-browser validation
 5. **Security Scanning**: Dependency and vulnerability checks
-6. **Coverage Verification**: Minimum 90% coverage enforcement
+6. **Coverage Verification**: Minimum 70% coverage enforcement
 7. **Deployment Readiness**: Quality gate validation for deployment
 
 ### Automated Reporting
@@ -292,7 +292,7 @@ The testing pipeline includes:
 2. **MongoDB Connection**: Ensure MongoDB service is running for integration tests
 3. **OpenAI API**: Verify API key configuration for AI quality tests
 4. **Playwright Setup**: Run `npx playwright install` for E2E tests
-5. **Coverage Thresholds**: Increase test coverage to meet 90% requirement
+5. **Coverage Thresholds**: Increase test coverage to meet 70% requirement
 
 ### Debug Mode
 

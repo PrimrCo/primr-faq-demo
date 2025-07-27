@@ -3,7 +3,7 @@
 ## [Unreleased]
 
 ### Added
-- **Comprehensive Testing & Quality Assurance Framework:** Implemented a complete testing infrastructure with >90% code coverage requirement, automated quality validation, and continuous integration pipeline.
+- **Comprehensive Testing & Quality Assurance Framework:** Implemented a complete testing infrastructure with 70% code coverage requirement, automated quality validation, and continuous integration pipeline.
   - **Unit Tests:** Individual function and component testing for text extraction utilities and core components
   - **Integration Tests:** API endpoint testing with mocked dependencies for faq, upload, chat-history, and events endpoints
   - **AI Quality Tests:** Automated evaluation of AI response accuracy, relevance, coherence, and bias detection using OpenAI-powered quality metrics
@@ -38,7 +38,7 @@
 - **Testing Scripts:** Added comprehensive npm scripts for running different test categories and generating quality reports
 
 ### Testing Coverage
-- **>90% Code Coverage:** Comprehensive test suite covering all AI features and integrations
+- **70% Code Coverage:** Comprehensive test suite covering all AI features and integrations
 - **Performance Benchmarks:** Established baseline metrics for all critical endpoints with regression detection
 - **Quality Gates:** Automated checks that prevent deployment of code that doesn't meet quality standards
 - **Cross-Browser Testing:** E2E tests running on Chrome, Firefox, Safari, and mobile browsers
