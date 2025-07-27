@@ -3,16 +3,18 @@
  * Global test configuration and mocks
  */
 
-import { TestEnvironment } from '../lib/testing/core';
-
 // Set up test environment
 beforeAll(() => {
-  TestEnvironment.setupTestEnv();
+  // Set test environment variables
+  process.env.NODE_ENV = 'test';
+  process.env.MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/primr-faq-test';
+  process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'test-key';
+  process.env.AWS_REGION = 'us-east-1';
 });
 
 // Clean up after all tests
 afterAll(() => {
-  TestEnvironment.cleanupTestEnv();
+  // Cleanup code if needed
 });
 
 // Mock NextAuth globally
