@@ -11,6 +11,7 @@ A Next.js project for uploading, parsing, and querying FAQ documents using OpenA
 - [Setup & Development](#setup--development)
 - [Environment Variables](#environment-variables)
 - [Running the App](#running-the-app)
+- [Testing](#testing)
 - [Usage](#usage)
   - [Uploading Documents](#uploading-documents)
   - [Asking Questions](#asking-questions)
@@ -93,6 +94,82 @@ npm run dev
 ```
 
 Visit [http://localhost:3000/](http://localhost:3000/) in your browser.
+
+---
+
+## Testing
+
+This project includes a comprehensive testing framework with multiple test types and quality assurance tools.
+
+### Quick Start
+
+**Prerequisites:**
+- Node.js 18+
+- MongoDB running locally (for integration tests)
+- OpenAI API key (for AI quality tests)
+
+**Installation:**
+```sh
+# Install test dependencies
+npm install
+
+# Install Playwright browsers for E2E tests
+npx playwright install
+```
+
+### Running Tests
+
+```sh
+# Run all tests
+npm test
+
+# Run specific test categories
+npm run test:unit           # Unit tests only
+npm run test:integration    # Integration tests (requires MongoDB)
+npm run test:ai-quality     # AI quality validation tests  
+npm run test:performance    # Performance and load tests
+npm run test:e2e            # End-to-end tests with Playwright
+
+# Development & Debugging
+npm run test:watch          # Watch mode for development
+npm run test:coverage       # Generate coverage reports
+npm run test:ci             # CI mode with full reporting
+
+# Quality Assurance
+npm run quality:check       # Complete quality validation
+npm run quality:report      # Generate comprehensive quality report
+```
+
+### Test Environment Setup
+
+For testing, create a `.env.test` file or ensure these variables are set:
+
+```bash
+NODE_ENV=test
+MONGODB_URI=mongodb://localhost:27017/primr-faq-test
+OPENAI_API_KEY=your-openai-api-key
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=test-access-key
+AWS_SECRET_ACCESS_KEY=test-secret-key
+AWS_BUCKET_NAME=test-bucket
+```
+
+### Test Types Included
+
+1. **Unit Tests** - Test individual functions and components
+2. **Integration Tests** - Test API endpoints and database interactions
+3. **AI Quality Tests** - Validate AI response accuracy and quality
+4. **Performance Tests** - Load testing and performance validation
+5. **E2E Tests** - Full user workflow testing across browsers
+
+### Quality Requirements
+
+- **Code Coverage**: Minimum 90% across lines, functions, branches, and statements
+- **Performance**: Response times must meet defined thresholds
+- **AI Quality**: Automated evaluation of response accuracy and relevance
+- **Cross-Browser**: Testing on Chrome, Firefox, and Safari
+
+For detailed testing documentation, see [TESTING.md](TESTING.md).
 
 ---
 

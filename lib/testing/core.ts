@@ -197,13 +197,15 @@ export class TestEnvironment {
    * Set up test environment variables
    */
   static setupTestEnv(): void {
-    process.env.NODE_ENV = 'test';
+    // Skip setting NODE_ENV as it may be read-only in deployment environments
+    // Instead, rely on the environment to set it appropriately
+    
     process.env.MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/primr-faq-test';
     process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'test-key';
-    process.env.AWS_REGION = 'us-east-1';
-    process.env.AWS_ACCESS_KEY_ID = 'test-access-key';
-    process.env.AWS_SECRET_ACCESS_KEY = 'test-secret-key';
-    process.env.AWS_BUCKET_NAME = 'test-bucket';
+    process.env.AWS_REGION = process.env.AWS_REGION || 'us-east-1';
+    process.env.AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || 'test-access-key';
+    process.env.AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY || 'test-secret-key';
+    process.env.AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME || 'test-bucket';
   }
 
   /**
