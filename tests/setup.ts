@@ -5,8 +5,7 @@
 
 // Set up test environment
 beforeAll(() => {
-  // Set test environment variables
-  process.env.NODE_ENV = 'test';
+  // Set test environment variables (skip NODE_ENV as it may be read-only)
   process.env.MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/primr-faq-test';
   process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'test-key';
   process.env.AWS_REGION = 'us-east-1';
