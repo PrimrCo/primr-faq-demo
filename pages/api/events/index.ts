@@ -2,7 +2,6 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]";
 import clientPromise from "../../../lib/mongo";
-import { ObjectId } from "mongodb";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log("NODE_ENV:", process.env.NODE_ENV, "x-test-user:", req.headers["x-test-user"]);

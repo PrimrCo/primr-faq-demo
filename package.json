@@ -10,7 +10,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "ask-primr": "npx tsx scripts/check-environment.ts"
+    "ask-primr": "npx tsx scripts/check-environment.ts",
+    "test": "npx jest",
+    "test:unit": "npx jest --selectProjects=unit",
+    "test:integration": "npx jest --selectProjects=integration",
+    "test:ai-quality": "npx jest --selectProjects=ai-quality",
+    "test:performance": "npx jest --selectProjects=performance",
+    "test:e2e": "npx playwright test",
+    "test:coverage": "npx jest --coverage",
+    "test:watch": "npx jest --watch",
+    "test:ci": "npx jest --ci --coverage --passWithNoTests",
+    "quality:check": "npm run lint && npm run test:coverage && npm run test:e2e",
+    "quality:report": "node scripts/generate-quality-report.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.848.0",
@@ -28,14 +39,25 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.1",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/formidable": "^3.4.5",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/supertest": "^6.0.3",
     "eslint": "9.31.0",
     "eslint-config-next": "15.4.3",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
+    "playwright": "^1.54.1",
+    "supertest": "^7.1.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "ts-jest": "^29.4.0",
+    "typescript": "5.8.3"
   }
 }

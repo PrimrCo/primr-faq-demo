@@ -39,7 +39,8 @@ export default async function handler(
         eventId: new ObjectId(eventId),
       }).toArray();
       return res.status(200).json({ chats });
-    } catch (e) {
+    } catch (error) {
+      console.error('Error fetching chats:', error);
       return res.status(400).json({ error: "Invalid eventId" });
     }
   }

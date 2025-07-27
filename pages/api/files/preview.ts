@@ -13,7 +13,7 @@ const s3 = new S3Client({
 });
 
 function streamToString(stream: Readable): Promise<string> {
-  const chunks: any[] = [];
+  const chunks: Buffer[] = [];
   return new Promise((resolve, reject) => {
     stream.on("data", (chunk) => chunks.push(chunk));
     stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
@@ -53,7 +53,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const text = await streamToString(body);
     const preview = text.slice(0, 500);
     return res.status(200).json({ preview });
-  } catch (e) {
+  } catch (error) {
+    console.error('File preview error:', error);
     return res.status(500).json({ error: "Could not preview file" });
   }
 }
