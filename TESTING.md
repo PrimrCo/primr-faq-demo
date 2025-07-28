@@ -1,46 +1,5 @@
 # Comprehensive Testing & Quality Assurance Framework
 
-This repository includes a comprehensive testing and quality assurance framework designed to ensure reliability, performance, and user experience across all AI-powered features in the Primr FAQ Demo application.
-
-## 🎯 Overview
-
-The testing framework provides:
-- **70% Code Coverage** requirement with automated quality gates
-- **AI Quality Validation** for response accuracy, relevance, and bias detection
-- **Performance Testing** with load testing and regression detection
-- **End-to-End Testing** for critical user workflows
-- **CI/CD Pipeline** with GitHub Actions integration
-- **Automated Quality Reporting** with comprehensive metrics
-
-## 🏗️ Framework Architecture
-
-### Testing Types
-
-1. **Unit Tests** (`tests/unit/`)
-   - Individual function and component testing
-   - Utilities for text extraction and processing
-   - Core testing infrastructure validation
-
-2. **Integration Tests** (`tests/integration/`)
-   - API endpoint testing with mocked dependencies
-   - Database interaction validation
-   - External service integration testing
-
-3. **AI Quality Tests** (`tests/ai-quality/`)
-   - Automated AI response evaluation
-   - Accuracy, relevance, coherence, and bias detection
-   - Consistency testing across similar inputs
-
-4. **Performance Tests** (`tests/performance/`)
-   - Load testing and stress testing
-   - Response time analysis and throughput measurement
-   - Performance regression detection
-
-5. **End-to-End Tests** (`tests/e2e/`)
-   - Complete user workflow validation
-   - Cross-browser testing with Playwright
-   - Mobile and responsive design testing
-
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -48,6 +7,7 @@ The testing framework provides:
 - Node.js 18+
 - MongoDB (for integration tests)
 - OpenAI API key (for AI quality tests)
+- **🔴 CRITICAL: Playwright browsers installed (for E2E tests)**
 
 ### Installation
 
@@ -55,240 +15,118 @@ The testing framework provides:
 # Install dependencies
 npm install
 
-# Install Playwright browsers for E2E tests
+# 🚨 REQUIRED: Install Playwright browsers for E2E tests
 npx playwright install
+
+# Alternative: Install only Chromium to save space
+npx playwright install chromium
 ```
 
 ### Running Tests
 
-```bash
-# Run all tests
-npm test
+**🚨 IMPORTANT: E2E tests require both Playwright browsers AND the development server**
 
-# Run specific test categories
-npm run test:unit
-npm run test:integration
-npm run test:ai-quality
-npm run test:performance
+```bash
+# Method 1: Automatic (Playwright starts server)
 npm run test:e2e
 
-# Run tests with coverage
-npm run test:coverage
+# Method 2: Manual (2 terminals)
+# Terminal 1: Start the development server
+npm run dev
 
-# Watch mode for development
-npm run test:watch
-
-# CI mode with coverage and reporting
-npm run test:ci
+# Terminal 2: Run E2E tests
+npx playwright test
 ```
 
-### Quality Checks
-
+Other test types:
 ```bash
-# Run complete quality check (lint + test + e2e)
-npm run quality:check
+# Run all tests except E2E (no external dependencies)
+npm test
 
-# Generate quality assurance report
-npm run quality:report
+# Individual test categories
+npm run test:unit          # No external dependencies
+npm run test:integration   # Requires MongoDB
+npm run test:ai-quality    # Requires OpenAI API key
+npm run test:performance   # No external dependencies
+
+# Development
+npm run test:watch         # Watch mode
+npm run test:coverage      # With coverage report
+npm run quality:report     # Generate quality report
 ```
 
-## 🔧 Configuration
+## 🌐 End-to-End Testing (Simplified)
 
-### Jest Configuration
+### Current E2E Test Coverage
 
-The Jest configuration supports multiple test projects with different environments and timeouts:
+**Note: This is a simplified test suite for basic smoke testing. The comprehensive 60+ test suite mentioned in comments has been simplified to a single smoke test.**
 
-- **Unit Tests**: Fast execution with mocked dependencies
-- **Integration Tests**: Database integration with MongoDB service
-- **AI Quality Tests**: OpenAI API integration for quality evaluation
-- **Performance Tests**: Extended timeout for load testing
+Current test validates:
+- ✅ Homepage loads successfully
+- ✅ Page title matches expected pattern (`/Primr Event Manager/`)
+- ✅ Basic page structure exists (body element visible)
+- ✅ Page content is not empty
 
-### Environment Variables
+### Browser Support
 
-Required for testing:
+- **Desktop**: Chromium only (simplified from multi-browser)
+- **Framework**: Playwright
+- **Test Type**: Basic smoke test
 
+### Troubleshooting E2E Tests
+
+**Common Issues:**
+
+1. **"browserType.launch: Failed to launch chromium"**
+   ```bash
+   # Solution: Install Playwright browsers
+   npx playwright install
+   ```
+
+2. **"Connection refused"**
+   → Development server not running (`npm run dev`)
+
+3. **"Error: expect(received).toHaveTitle(expected)"**
+   → Page title doesn't match `/Primr Event Manager/` pattern
+
+4. **Tests timing out**
+   → Server starting slowly, wait longer or check if port 3000 is free
+
+**Debug Mode:**
 ```bash
-NODE_ENV=test
-MONGODB_URI=mongodb://localhost:27017/primr-faq-test
-OPENAI_API_KEY=your-openai-api-key
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=test-access-key
-AWS_SECRET_ACCESS_KEY=test-secret-key
-AWS_BUCKET_NAME=test-bucket
+# Run with browser visible
+npx playwright test --headed
+
+# Run specific test file
+npx playwright test tests/e2e/user-workflows.spec.ts
+
+# Debug mode (step through)
+npx playwright test --debug
+
+# Check installed browsers
+npx playwright --version
+npx playwright install --dry-run
 ```
 
-## 🧪 Testing Infrastructure
+## ✅ Test Status Requirements
 
-### Core Classes
+**For E2E tests to pass:**
+- ✅ **Playwright browsers installed** (`npx playwright install`)
+- ✅ Development server running on `http://localhost:3000`
+- ✅ Page title contains "Primr Event Manager"
+- ✅ Basic page structure renders correctly
+- ✅ No critical JavaScript errors prevent page load
 
-- **TestSuiteManager**: Organizes and manages different test suites
-- **QualityMetricsCollector**: Collects and analyzes AI quality metrics
-- **PerformanceBenchmarkManager**: Tracks performance benchmarks and regressions
-- **AIQualityEvaluator**: Automated AI response quality evaluation
-- **PerformanceTester**: Load testing and performance analysis
-
-### TypeScript Interfaces
-
-- `TestSuite`: Test suite configuration and results
-- `AIQualityTest`: AI quality test specifications
-- `PerformanceBenchmark`: Performance metrics and thresholds
-- `QualityMetric`: Quality measurement results
-- `TestResult`: Individual test execution results
-
-## 📊 Quality Gates
-
-The framework enforces quality gates that must pass for deployment:
-
-1. **Code Quality**: ESLint and TypeScript compilation
-2. **Test Coverage**: Minimum 70% coverage across all metrics
-3. **Unit Tests**: All unit tests must pass
-4. **Integration Tests**: API and database integration validation
-5. **Performance Tests**: Response time and throughput thresholds
-6. **Security Tests**: Vulnerability scanning
-
-## 🤖 AI Quality Validation
-
-### Automated Evaluation Metrics
-
-- **Accuracy**: Comparison with expected outputs using semantic similarity
-- **Relevance**: Evaluation of response relevance to input questions
-- **Coherence**: Assessment of response structure and readability
-- **Responsiveness**: Response time efficiency measurement
-- **Bias Detection**: Identification of problematic content in AI responses
-- **Consistency**: Validation of consistent behavior across similar inputs
-
-### Quality Test Configuration
-
-```typescript
-const qualityTest: AIQualityTest = {
-  id: 'faq-quality-test',
-  feature: 'faq-system',
-  testCases: [
-    {
-      input: 'What time does the event start?',
-      expectedOutput: 'The event starts at 7:00 PM.',
-      evaluationCriteria: ['accuracy', 'relevance', 'coherence'],
-      acceptanceThreshold: 0.8
-    }
-  ],
-  qualityMetrics: {
-    accuracy: 0,
-    relevance: 0,
-    coherence: 0,
-    responsiveness: 0
-  },
-  lastEvaluation: new Date()
-};
-```
-
-## 📈 Performance Testing
-
-### Load Testing Scenarios
-
-- **FAQ Endpoint**: Concurrent user simulation for Q&A interactions
-- **File Upload**: Document processing performance under load
-- **Chat History**: Retrieval performance testing
-
-### Performance Thresholds
-
-- **FAQ API**: < 5s response time, > 1 req/s throughput, < 5% error rate
-- **Upload API**: < 30s response time, > 0.5 req/s throughput, < 5% error rate
-- **Chat History**: < 2s response time, > 5 req/s throughput, < 2% error rate
-
-## 🌐 End-to-End Testing
-
-### User Workflows Tested
-
-1. **Authentication Flow**: Sign-in/sign-out processes
-2. **Event Management**: Create, select, and manage events
-3. **Document Upload**: File upload and processing workflows
-4. **FAQ Interaction**: Question asking and answer retrieval
-5. **Chat History**: History viewing and management
-6. **Responsive Design**: Mobile and tablet compatibility
-
-### Cross-Browser Support
-
-- **Desktop**: Chrome, Firefox, Safari
-- **Mobile**: iOS Safari, Android Chrome
-- **Responsive**: Various viewport sizes
-
-## 🔄 CI/CD Integration
-
-### GitHub Actions Workflow
-
-The testing pipeline includes:
-
-1. **Quality Gates**: Code linting and TypeScript compilation
-2. **Parallel Test Execution**: Unit, integration, and AI quality tests
-3. **Performance Validation**: Load testing with regression detection
-4. **E2E Testing**: Cross-browser validation
-5. **Security Scanning**: Dependency and vulnerability checks
-6. **Coverage Verification**: Minimum 70% coverage enforcement
-7. **Deployment Readiness**: Quality gate validation for deployment
-
-### Automated Reporting
-
-- **Test Results**: Detailed test execution reports
-- **Coverage Reports**: Line, function, branch, and statement coverage
-- **Performance Metrics**: Response time and throughput analysis
-- **Quality Metrics**: AI response quality assessment
-- **Security Reports**: Vulnerability and dependency analysis
-
-## 📋 Test Data Management
-
-### Mock Data Generation
-
-- **Events**: Test event creation with realistic data
-- **Embeddings**: Mock document embeddings for testing
-- **Chat History**: Generated conversation history
-- **User Sessions**: Test user authentication simulation
-
-### Fixtures and Utilities
-
-- Test data generators for consistent test scenarios
-- Mock API responses for external service dependencies
-- Database seeding utilities for integration tests
-- File upload simulation for testing document processing
-
-## 🔍 Monitoring and Alerting
-
-### Quality Metrics Tracking
-
-- **Test Execution Time**: Performance trend monitoring
-- **Coverage Trends**: Coverage improvement tracking
-- **Failure Rates**: Test stability analysis
-- **Performance Regressions**: Automated regression detection
-
-### Alerting
-
-- **Quality Gate Failures**: Immediate notification on CI/CD failures
-- **Coverage Drops**: Alerts when coverage falls below thresholds
-- **Performance Degradation**: Notification of response time increases
-- **Security Vulnerabilities**: Immediate alerts for security issues
-
-## 📚 Best Practices
-
-### Writing Tests
-
-1. **Descriptive Names**: Clear test descriptions that explain purpose
-2. **Arrange-Act-Assert**: Structured test organization
-3. **Independent Tests**: No dependencies between test cases
-4. **Mock External Dependencies**: Consistent and reliable test execution
-5. **Edge Case Coverage**: Test boundary conditions and error scenarios
-
-### Maintaining Quality
-
-1. **Regular Review**: Periodic assessment of test effectiveness
-2. **Coverage Analysis**: Identify untested code paths
-3. **Performance Monitoring**: Track response time trends
-4. **AI Quality Tracking**: Monitor AI response quality over time
-5. **Security Updates**: Regular dependency and vulnerability scanning
+**Browser Storage Location:**
+- **Mac**: `~/Library/Caches/ms-playwright`
+- **Windows**: `%USERPROFILE%\AppData\Local\ms-playwright`
+- **Linux**: `~/.cache/ms-playwright`
 
 ## 🔧 Troubleshooting
 
 ### Common Issues
 
-1. **Test Timeouts**: Increase timeout values for long-running tests
+1. **Test Timeouts**: E2E test expects page title `/Primr Event Manager/` - verify your app's title
 2. **MongoDB Connection**: Ensure MongoDB service is running for integration tests
 3. **OpenAI API**: Verify API key configuration for AI quality tests
 4. **Playwright Setup**: Run `npx playwright install` for E2E tests

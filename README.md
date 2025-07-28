@@ -4,108 +4,7 @@ A Next.js project for uploading, parsing, and querying FAQ documents using OpenA
 
 ---
 
-## Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Setup & Development](#setup--development)
-- [Environment Variables](#environment-variables)
-- [Running the App](#running-the-app)
-- [Testing](#testing)
-- [Usage](#usage)
-  - [Uploading Documents](#uploading-documents)
-  - [Asking Questions](#asking-questions)
-- [API Reference](#api-reference)
-  - [`POST /api/upload`](#post-apiupload)
-  - [`POST /api/faq`](#post-apifaq)
-- [Example UI Integration](#example-ui-integration)
-- [FAQ](#faq)
-- [Troubleshooting](#troubleshooting)
-- [Event Grouping](#event-grouping)
-- [Commands](#commands)
-
----
-
-## Features
-
-- **Google Authentication** (NextAuth)
-- **File Upload** to S3, organized per user
-- **Document Parsing**: `.md`, `.txt`, `.pdf`, `.docx`, `.csv`, `.xlsx`
-- **OpenAI Embeddings** for semantic search
-- **MongoDB** for persistent embedding storage
-- **Minimal UI** for upload and Q&A, with Primr branding
-
----
-
-## Tech Stack
-
-- Next.js 15 (App Router for UI, Pages Router for API)
-- NextAuth.js (Google provider)
-- AWS S3 (file storage)
-- MongoDB (embedding storage)
-- OpenAI Node SDK v4+
-- Tailwind CSS (optional, for styling)
-
----
-
-## Setup & Development
-
-1. **Clone the repo:**
-   ```sh
-   git clone https://github.com/your-org/primr-faq-demo.git
-   cd primr-faq-demo
-   ```
-
-2. **Install dependencies:**
-   ```sh
-   npm install
-   ```
-
-3. **Configure environment variables:**
-
-   Create a `.env.local` file in the project root:
-
-   ```
-   AWS_ACCESS_KEY_ID=your-aws-access-key
-   AWS_SECRET_ACCESS_KEY=your-aws-secret
-   AWS_S3_BUCKET=your-s3-bucket
-   AWS_REGION=us-east-2
-
-   OPENAI_API_KEY=sk-...
-
-   GOOGLE_CLIENT_ID=...
-   GOOGLE_CLIENT_SECRET=...
-   NEXTAUTH_SECRET=...
-
-   MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/?retryWrites=true&w=majority
-   ```
-
-4. **Add your logo:**
-
-   Place your logo at:
-   `public/images/logo-v1.jpg`
-
----
-
-## Running the App
-
-```sh
-npm run dev
-```
-
-Visit [http://localhost:3000/](http://localhost:3000/) in your browser.
-
----
-
-## Testing
-
-This project includes a comprehensive testing framework with multiple test types and quality assurance tools.
-
----
-
-## 🧪 Complete Local Testing Guide for Beginners
-
-**👋 New to testing? Follow this step-by-step guide to run tests on your computer.**
+## 🧪 Complete Local Setup Guide
 
 ### Step 1: Check Your Computer Requirements
 
@@ -114,14 +13,56 @@ Before starting, make sure your computer has:
 - **Git** - [Download here](https://git-scm.com/)
 - **MongoDB** - [Download here](https://www.mongodb.com/try/download/community) (we'll help you install this)
 
-### Step 2: Get API Keys (Required for AI Tests)
+### Step 2: Get API Keys
 
-You'll need an OpenAI API key:
+#### 🏢 **For Primr Team Members (Recommended)**
+
+**Contact your team lead or project manager to get:**
+- Primr's shared OpenAI API key
+- AWS credentials for the Primr S3 bucket
+- Any other required environment variables
+
+This ensures:
+- ✅ Consistent API usage tracking
+- ✅ Centralized billing management
+- ✅ Proper security controls
+- ✅ No personal cost to developers
+
+#### 🔧 **For External Developers or Personal Testing**
+
+If you need to set up your own keys for testing:
+
+**OpenAI API Key:**
 1. Go to [OpenAI Platform](https://platform.openai.com/)
 2. Sign up or log in
 3. Go to API Keys section
 4. Create a new secret key
 5. Copy it (it looks like: `sk-proj-abc123...`)
+
+**Note:** Personal OpenAI usage will be billed to your account. For production work, always use team-provided keys.
+
+#### 🏆 **How Professional Teams Manage API Keys**
+
+**Best Practices:**
+- **Shared Development Keys**: Team provides dev/staging keys for local development
+- **Environment Separation**: Different keys for dev, staging, and production
+- **Access Control**: Keys distributed through secure channels (not Slack/email)
+- **Usage Monitoring**: Centralized tracking of API usage and costs
+- **Key Rotation**: Regular rotation of keys for security
+- **Secret Management**: Keys stored in tools like AWS Secrets Manager, HashiCorp Vault, or team password managers
+
+**Common Team Structures:**
+```
+Development Environment:
+├── Team Lead provides: OPENAI_API_KEY_DEV
+├── DevOps provides: AWS credentials (dev bucket)
+└── Shared MongoDB instance or Docker setup
+
+Production Environment:
+├── Infrastructure team manages all keys
+├── Deployed via CI/CD with secret injection
+└── No individual developer access to prod keys
+```
 
 ### Step 3: Install MongoDB Locally
 
@@ -173,32 +114,61 @@ npx playwright install
 
 ### Step 5: Create Environment Files
 
-Create a file called `.env.local` in the project root and add your API keys:
+Create a file called `.env.local` in the project root:
 
 ```bash
 # Copy the example file first
 cp .env.example .env.local
 ```
 
-Then edit `.env.local` with your real values:
-```bash
-# OpenAI API Key (required for AI tests)
-OPENAI_API_KEY=sk-proj-your-actual-openai-key-here
+#### 🏢 **For Primr Team Members**
 
-# AWS Settings (can use test values)
-AWS_ACCESS_KEY_ID=test-access-key
-AWS_SECRET_ACCESS_KEY=test-secret-key
-AWS_S3_BUCKET=test-bucket
+Edit `.env.local` with the keys provided by your team lead:
+
+```bash
+# OpenAI API Key (get from team lead)
+OPENAI_API_KEY=sk-proj-[KEY-PROVIDED-BY-TEAM-LEAD]
+
+# AWS Settings (get from DevOps/team lead)
+AWS_ACCESS_KEY_ID=[PROVIDED-ACCESS-KEY]
+AWS_SECRET_ACCESS_KEY=[PROVIDED-SECRET-KEY]
+AWS_S3_BUCKET=[PRIMR-DEV-BUCKET-NAME]
 AWS_REGION=us-east-1
 
-# MongoDB (should work as-is if MongoDB is running locally)
+# MongoDB (team may provide shared instance)
+MONGODB_URI=mongodb://localhost:27017/primr-faq-demo
+# Or use team-provided URI: mongodb://[TEAM-MONGODB-URL]
+
+# Google OAuth (get from team lead)
+GOOGLE_CLIENT_ID=[PROVIDED-CLIENT-ID]
+GOOGLE_CLIENT_SECRET=[PROVIDED-CLIENT-SECRET]
+NEXTAUTH_SECRET=[PROVIDED-SECRET]
+```
+
+#### 🔧 **For External/Personal Development**
+
+Edit `.env.local` with your own test values:
+
+```bash
+# OpenAI API Key (your personal key - will be billed to you)
+OPENAI_API_KEY=sk-proj-your-actual-openai-key-here
+
+# AWS Settings (your test AWS account or mock values)
+AWS_ACCESS_KEY_ID=test-access-key
+AWS_SECRET_ACCESS_KEY=test-secret-key
+AWS_S3_BUCKET=your-test-bucket
+AWS_REGION=us-east-1
+
+# MongoDB (local instance)
 MONGODB_URI=mongodb://localhost:27017/primr-faq-demo
 
-# Google OAuth (not needed for tests)
+# Google OAuth (create your own OAuth app or use test values)
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 NEXTAUTH_SECRET=your-nextauth-secret
 ```
+
+**⚠️ Security Note:** Never commit real API keys to git. The `.env.local` file is already in `.gitignore`.
 
 ### Step 6: Verify Everything is Working
 
@@ -208,6 +178,8 @@ npx ask-primr check-environment
 ```
 
 You should see green checkmarks ✅ for most items.
+
+**🏢 Team members:** If you see red ❌ marks, contact your team lead for the correct environment values.
 
 ### Step 7: Run Your First Test
 
@@ -244,6 +216,8 @@ npm run test:performance
 npm run test:e2e
 ```
 
+**🏢 Note for team members:** AI Quality tests will use the team's OpenAI quota. Run these sparingly during development.
+
 ### Step 9: Run All Tests with Coverage
 
 ```bash
@@ -274,9 +248,35 @@ This creates detailed reports in the `reports/` folder.
 
 ## 🔧 Troubleshooting Common Issues
 
+### ❌ "OpenAI API key invalid"
+**Problem:** Wrong or missing API key
+
+**For Primr team members:**
+1. Contact your team lead for the correct development API key
+2. Verify the key in your `.env.local` file
+3. Make sure you're using the team's development key, not a personal one
+
+**For external developers:**
+1. Check your `.env.local` file
+2. Make sure the key starts with `sk-proj-` or `sk-`
+3. Verify the key works at [OpenAI Platform](https://platform.openai.com/)
+
+### ❌ "AWS S3 access denied"
+**Problem:** Wrong AWS credentials
+
+**For Primr team members:**
+1. Contact DevOps or your team lead for development AWS credentials
+2. Ensure you're using the correct S3 bucket name for development
+
+**For external developers:**
+1. Set up your own AWS account and S3 bucket
+2. Create IAM credentials with S3 access
+3. Update `.env.local` with your credentials
+
 ### ❌ "MongoDB connection failed"
 **Problem:** MongoDB isn't running
-**Solution:** 
+
+**Solution:**
 ```bash
 # Mac
 brew services start mongodb-community
@@ -287,16 +287,11 @@ sudo systemctl start mongod
 # Windows - start MongoDB service from Services app
 ```
 
-### ❌ "OpenAI API key invalid"
-**Problem:** Wrong or missing API key
-**Solution:** 
-1. Check your `.env.local` file
-2. Make sure the key starts with `sk-proj-` or `sk-`
-3. Verify the key works at [OpenAI Platform](https://platform.openai.com/)
+**For teams:** Your team may provide a shared MongoDB instance URL.
 
 ### ❌ "Cannot find module" errors
 **Problem:** Missing dependencies
-**Solution:** 
+**Solution:**
 ```bash
 # Reinstall everything
 rm -rf node_modules package-lock.json
@@ -306,7 +301,7 @@ npx playwright install
 
 ### ❌ Tests timing out
 **Problem:** Tests taking too long
-**Solution:** 
+**Solution:**
 ```bash
 # Run tests one at a time instead of all together
 npm run test:unit
@@ -316,7 +311,7 @@ npm run test:integration
 
 ### ❌ "Port already in use"
 **Problem:** Another app is using the port
-**Solution:** 
+**Solution:**
 ```bash
 # Kill any running processes
 pkill -f node
@@ -327,12 +322,26 @@ pkill -f node
 
 ## 📋 Quick Reference
 
+### Team Communication
+
+**🏢 For Primr Team Members:**
+- **Slack Channel**: #primr-development (for environment setup help)
+- **Team Lead**: Contact for API keys and AWS credentials
+- **DevOps**: Contact for infrastructure and deployment issues
+- **Code Reviews**: All environment changes should be reviewed
+
+**📝 When asking for help, include:**
+- Your operating system (Mac/Windows/Linux)
+- Error messages (full screenshots)
+- Which step you're stuck on
+- Whether you're using team keys or personal keys
+
 ### Test Commands
 ```bash
 npm test                    # Run all tests
-npm run test:unit          # Unit tests only  
+npm run test:unit          # Unit tests only
 npm run test:integration   # Integration tests (needs MongoDB)
-npm run test:ai-quality    # AI tests (needs OpenAI key)
+npm run test:ai-quality    # AI tests (uses OpenAI quota - be mindful!)
 npm run test:performance   # Performance tests
 npm run test:e2e           # Browser tests
 npm run test:coverage      # All tests + coverage report
@@ -347,26 +356,31 @@ npm run quality:report     # Generate detailed reports
    - Tests individual functions
    - Very fast (< 30 seconds)
    - Doesn't need external services
+   - **Cost**: Free
 
 2. **Integration Tests** (`npm run test:integration`)
-   - Tests API endpoints 
+   - Tests API endpoints
    - Needs MongoDB running
    - Takes 1-2 minutes
+   - **Cost**: Free
 
 3. **AI Quality Tests** (`npm run test:ai-quality`)
    - Tests AI response quality
    - Needs OpenAI API key
    - Takes 2-3 minutes
+   - **Cost**: ~$0.01-0.05 per test run (uses team quota)
 
 4. **Performance Tests** (`npm run test:performance`)
    - Tests speed and load handling
    - Takes 3-5 minutes
    - Tests multiple users at once
+   - **Cost**: Free
 
 5. **End-to-End Tests** (`npm run test:e2e`)
    - Tests the full app in real browsers
    - Takes 5-10 minutes
    - Tests clicking, typing, navigation
+   - **Cost**: Free
 
 ### Quality Requirements
 
