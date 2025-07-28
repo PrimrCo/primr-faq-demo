@@ -2,6 +2,12 @@
 
 A Next.js project for uploading, parsing, and querying FAQ documents using OpenAI embeddings and semantic search.
 
+### ⚠️ Migration Notice
+> This is a demonstration project showcasing AI/FAQ capabilities.
+> 🚀 For the production platform: Primr Events at [events.primr.co](events.primr.co)
+
+
+
 ---
 
 ## 🧪 Complete Local Setup Guide
